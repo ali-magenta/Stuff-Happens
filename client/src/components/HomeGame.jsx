@@ -21,7 +21,8 @@ function HomeGame(props) {
             {game && <Game setGame={setGame}></Game>}
           </Col>
           <Col xs={3} className='bg-info-subtle'>
-            game rules
+            Remember that after clicking on "Start the game!" the first round
+            will start.
           </Col>
         </Row>
       </Container>

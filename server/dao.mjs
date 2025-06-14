@@ -42,7 +42,7 @@ export const getUser = (email, password) => {
 // get cards and return 3
 export const listCards = () => {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM card";
+    const sql = "SELECT * FROM card ORDER BY RANDOM() LIMIT 3";
 
     db.all(sql, [], (err, rows) => {
       if (err) {
@@ -52,12 +52,39 @@ export const listCards = () => {
           (card) => new Card(card.id, card.name, card.image, card.index)
         );
 
-        const threeCards = [];
-        for (let i = 0; i < 2; i++) {
-          const index = Math.floor(Math.random() * cards.length);
-          const threeCards = [...cards.filter((card) => index === card.id)];
-        }
-        resolve(threeCards);
+        // const threeCards = cards.slice(0, 3);
+        resolve(cards);
+      }
+    });
+  });
+};
+
+// get card for a round
+export const getCard = (givenIdList) => {
+  return new Promise((resolve, reject) => {
+    const placeholders = givenIdList.map(() => "?").join(",");
+    const sql = `SELECT * FROM card where id NOT IN (${placeholders}) ORDER BY RANDOM() LIMIT 1`;
+
+    db.get(sql, givenIdList, (err, row) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(new Card(row.id, row.name, row.image, row.index));
+      }
+    });
+  });
+};
+
+// get index for a selected card
+export const getIndex = (id) => {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT "index" FROM card where id=?`;
+
+    db.get(sql, id, (err, row) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(row.index);
       }
     });
   });

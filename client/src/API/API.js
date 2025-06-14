@@ -61,4 +61,41 @@ async function getCards() {
   }
 }
 
-export { login, logout, getCurrentUser, getCards };
+// get card for round
+async function getcardRound() {
+  try {
+    const response = await fetch(URI + "/card");
+    if (response.ok) {
+      const card = await response.json();
+      return card;
+    } else {
+      throw new Error("Application error in getCardRound");
+    }
+  } catch (err) {
+    throw new Error("Network error in getCardRound " + err);
+  }
+}
+
+// get index of selected card
+async function getIndexSelected(id) {
+  try {
+    const response = await fetch(`${URI}/card/${id}/index`);
+    if (response.ok) {
+      const index = await response.json();
+      return index;
+    } else {
+      throw new Error("Application error in getIndexSelected");
+    }
+  } catch (err) {
+    throw new Error("Network error in getIndexSelected " + err);
+  }
+}
+
+export {
+  login,
+  logout,
+  getCurrentUser,
+  getCards,
+  getcardRound,
+  getIndexSelected,
+};

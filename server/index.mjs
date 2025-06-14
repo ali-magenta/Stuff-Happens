@@ -5,7 +5,7 @@ import LocalStrategy from "passport-local";
 import passport from "passport";
 import session from "express-session";
 import cors from "cors";
-import { getUser, listCards } from "./dao.mjs";
+import { getCard, getUser, listCards, getIndex } from "./dao.mjs";
 
 // init express
 const app = new express();
@@ -64,6 +64,9 @@ app.use(
 );
 app.use(passport.authenticate("session"));
 
+// static requests middleware
+app.use(express.static("public"));
+
 // save ids of cards already given in the game
 const givenCards = [];
 
@@ -103,15 +106,56 @@ app.post("/api/logout", isLoggedIn, (req, res) => {
 app.get("/api/cards", (request, response) => {
   listCards()
     .then((cards) => {
+      // reset the saved cards when calling for a new game
+      givenCards.length = 0;
       cards.forEach((card) => {
-        givenCards = [...card.id];
+        if (!givenCards.includes(card.id)) {
+          givenCards.push(card.id);
+        }
       });
+      cards.sort((a, b) => a.index - b.index);
       response.json(cards);
     })
     .catch((err) => {
       console.error(err);
       response.status(500).end();
     });
+});
+
+app.get("/api/card", async (request, response) => {
+  try {
+    const card = await getCard(givenCards);
+    if (card?.error) {
+      res.status(500).json({ error: card.error });
+    } else {
+      if (!givenCards.includes(card.id)) {
+        givenCards.push(card.id);
+      }
+      // send index later at the end of the round
+      response.json({
+        id: card.id,
+        name: card.name,
+        image: card.image,
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    response.status(500).end();
+  }
+});
+
+app.get("/api/card/:cardId/index", async (request, response) => {
+  try {
+    const index = await getIndex(request.params.cardId);
+    if (index?.error) {
+      res.status(500).json({ error: index.error });
+    } else {
+      response.json(index);
+    }
+  } catch (err) {
+    console.error(err);
+    response.status(500).end();
+  }
 });
 
 // activate the server
