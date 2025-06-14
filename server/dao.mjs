@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import sqlite from "sqlite3";
+import { Card } from "./DAOmodels.mjs";
 
 // open the database
 const db = new sqlite.Database("stuff.sqlite", (err) => {
@@ -33,6 +34,30 @@ export const getUser = (email, password) => {
             resolve(false);
           else resolve(user);
         });
+      }
+    });
+  });
+};
+
+// get cards and return 3
+export const listCards = () => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM card";
+
+    db.all(sql, [], (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        const cards = rows.map(
+          (card) => new Card(card.id, card.name, card.image, card.index)
+        );
+
+        const threeCards = [];
+        for (let i = 0; i < 2; i++) {
+          const index = Math.floor(Math.random() * cards.length);
+          const threeCards = [...cards.filter((card) => index === card.id)];
+        }
+        resolve(threeCards);
       }
     });
   });

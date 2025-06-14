@@ -5,7 +5,7 @@ import LocalStrategy from "passport-local";
 import passport from "passport";
 import session from "express-session";
 import cors from "cors";
-import { getUser } from "./dao.mjs";
+import { getUser, listCards } from "./dao.mjs";
 
 // init express
 const app = new express();
@@ -25,6 +25,7 @@ app.use(cors(corsOptions));
 
 // ?? TOLOOK
 passport.use(
+  // remember to pass the "email" field to this API
   new LocalStrategy({ usernameField: "email" }, async function verify(
     username,
     password,
@@ -63,6 +64,9 @@ app.use(
 );
 app.use(passport.authenticate("session"));
 
+// save ids of cards already given in the game
+const givenCards = [];
+
 /* AUTHENTICATION ROUTES */
 app.post("/api/login", function (req, res, next) {
   passport.authenticate("local", (err, user, info) => {
@@ -93,6 +97,21 @@ app.post("/api/logout", isLoggedIn, (req, res) => {
   req.logout(() => {
     res.end();
   });
+});
+
+/* ROUTES */
+app.get("/api/cards", (request, response) => {
+  listCards()
+    .then((cards) => {
+      cards.forEach((card) => {
+        givenCards = [...card.id];
+      });
+      response.json(cards);
+    })
+    .catch((err) => {
+      console.error(err);
+      response.status(500).end();
+    });
 });
 
 // activate the server
