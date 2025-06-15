@@ -21,6 +21,10 @@ function Game(props) {
   const [gameResult, setGameResult] = useState("");
   const [lostCards, setLostCards] = useState(0);
 
+  // handle timer
+  const [timeLeft, setTimeLeft] = useState(30);
+
+  // give initial cards
   useEffect(() => {
     const initialCards = async () => {
       const c = await getCards();
@@ -29,8 +33,8 @@ function Game(props) {
     initialCards();
   }, []);
 
+  // check if game is over
   useEffect(() => {
-    // check if game is over
     if (cards.length === 6) {
       setGameResult("won");
     } else if (lostCards === 3) {
@@ -38,13 +42,31 @@ function Game(props) {
     }
   }, [cards, lostCards]);
 
+  // manage timer
+  useEffect(() => {
+    if (!round) return;
+
+    if (timeLeft === 0) {
+      handleChoice(-1);
+    }
+
+    const timer = setTimeout(
+      () => setTimeLeft((timeLeft) => timeLeft - 1),
+      1000
+    );
+    return () => clearTimeout(timer);
+  }, [timeLeft, round]);
+
+  // handle beginning of a round
   const handleCardRound = async () => {
     setRound(true);
     setRoundNum((round) => round + 1);
     const card = await getcardRound();
     setCardRound(card);
+    setTimeLeft(30);
   };
 
+  // get index of this round, check if round won or lost, update cards won and lost
   const handleChoice = async (i) => {
     setRound(false);
 
@@ -82,7 +104,14 @@ function Game(props) {
         </Row>
         <Row className='mt-2 mb-3'>
           {roundNum !== 0 && (
-            <Col className='d-flex justify-content-end'>Round {roundNum}</Col>
+            <>
+              <Col xs={6} className='d-flex justify-content-start'>
+                Timer left: {timeLeft}
+              </Col>
+              <Col xs={6} className='d-flex justify-content-end'>
+                Round {roundNum}
+              </Col>
+            </>
           )}
         </Row>
         <Row className='mb-4'>
