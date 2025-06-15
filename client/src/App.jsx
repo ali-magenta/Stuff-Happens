@@ -18,7 +18,7 @@ function App() {
     try {
       const loginUser = await login(credentials);
       setLoggedIn(true);
-      setMessage({ msg: `Welcome, ${loginUser.name}!`, type: "success" });
+      setMessage({ msg: `Welcome, ${loginUser.email}!`, type: "success" });
       setUser(loginUser);
     } catch (err) {
       setMessage({ msg: err, type: "danger" });

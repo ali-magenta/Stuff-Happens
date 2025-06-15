@@ -13,7 +13,7 @@ function DefaultLayout(props) {
             onClose={() => props.setMessage("")}
             dismissible
           >
-            {props.message.type}
+            {props.message.msg}
           </Alert>
         </Row>
       )}
