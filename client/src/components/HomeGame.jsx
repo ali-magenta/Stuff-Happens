@@ -18,7 +18,7 @@ function HomeGame(props) {
                 Start a new game!
               </Button>
             )}
-            {game && <Game setGame={setGame}></Game>}
+            {game && <Game setGame={setGame} game={game}></Game>}
           </Col>
           <Col xs={3} className='bg-info-subtle'>
             Remember that after clicking on "Start the game!" the first round

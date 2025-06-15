@@ -12,11 +12,14 @@ import { getcardRound, getCards, getIndexSelected } from "../API/API";
 const URLImage = "http://localhost:3001/";
 
 function Game(props) {
-  const [round, setRound] = useState(0);
+  const [round, setRound] = useState(false);
+  const [roundNum, setRoundNum] = useState(0);
   const [cards, setCards] = useState([]);
   const [cardRound, setCardRound] = useState({});
   const [result, setResult] = useState(false);
   const [resultMessage, setResultMessage] = useState({ message: "", type: "" });
+  const [gameResult, setGameResult] = useState("");
+  const [lostCards, setLostCards] = useState(0);
 
   useEffect(() => {
     const initialCards = async () => {
@@ -26,13 +29,25 @@ function Game(props) {
     initialCards();
   }, []);
 
+  useEffect(() => {
+    // check if game is over
+    if (cards.length === 6) {
+      setGameResult("won");
+    } else if (lostCards === 3) {
+      setGameResult("lost");
+    }
+  }, [cards, lostCards]);
+
   const handleCardRound = async () => {
-    setRound((round) => round + 1);
+    setRound(true);
+    setRoundNum((round) => round + 1);
     const card = await getcardRound();
     setCardRound(card);
   };
 
   const handleChoice = async (i) => {
+    setRound(false);
+
     const index = await getIndexSelected(cardRound.id);
 
     // check if round won or lost
@@ -44,10 +59,12 @@ function Game(props) {
       // right positioning
       setResult(true);
       setResultMessage({ message: "Round won!", type: "success" });
-      setCards((cards) => [...cards, cardRound]);
+      // set cards adding new one for next match
+      setCards(totCards);
     } else {
       setResult(false);
       setResultMessage({ message: "Round lost!", type: "danger" });
+      setLostCards((lost) => lost + 1);
     }
   };
 
@@ -55,23 +72,32 @@ function Game(props) {
     <>
       <Container className=''>
         <Row className='d-flex justify-content-center'>
-          <Button variant='outline-success' onClick={handleCardRound}>
-            Start Round {round + 1}
-          </Button>
+          {!round && !gameResult && (
+            <Button variant='outline-success' onClick={handleCardRound}>
+              Start Round {roundNum + 1}
+            </Button>
+          )}
+          {gameResult === "won" && <Row>Game Over! You Won!</Row>}
+          {gameResult === "lost" && <Row>Game Over! You Lost!</Row>}
         </Row>
-        <Row className='mt-2'>
-          <Col className='d-flex justify-content-end'>Round {round}</Col>
+        <Row className='mt-2 mb-3'>
+          {roundNum !== 0 && (
+            <Col className='d-flex justify-content-end'>Round {roundNum}</Col>
+          )}
         </Row>
         <Row className='mb-4'>
-          <Col xs={1}>
-            {resultMessage && (
+          <Col xs={4}>
+            {resultMessage && !round && (
               <div className={`alert alert-${resultMessage.type}`}>
                 {resultMessage.message}
+                {!gameResult && (
+                  <div>Start a new round when you are ready.</div>
+                )}
               </div>
             )}
           </Col>
-          <Col xs={7}>
-            {round ? (
+          <Col xs={4}>
+            {roundNum ? (
               <Card style={{ width: "18rem", height: "20rem" }}>
                 <Card.Img
                   variant='top'
@@ -87,21 +113,33 @@ function Game(props) {
             )}
           </Col>
           <Col xs={4}>
-            <ButtonGroup vertical>
-              <Button key='0' onClick={() => handleChoice(0)}>
-                <p>Before card 1</p>
-              </Button>
-              {cards.map((c, index) => (
-                <Button key={c.id} onClick={() => handleChoice(index + 1)}>
-                  {index === cards.length - 1 && <p>After card {index + 1}</p>}
-                  {index !== cards.length - 1 && (
-                    <p>
-                      Between card {index + 1} and card {index + 2}
-                    </p>
-                  )}
+            {roundNum !== 0 && (
+              <ButtonGroup vertical>
+                <Button
+                  key='0'
+                  onClick={() => handleChoice(0)}
+                  disabled={!round}
+                >
+                  <p>Before card 1</p>
                 </Button>
-              ))}
-            </ButtonGroup>
+                {cards.map((c, index) => (
+                  <Button
+                    key={c.id}
+                    onClick={() => handleChoice(index + 1)}
+                    disabled={!round}
+                  >
+                    {index === cards.length - 1 && (
+                      <p>After card {index + 1}</p>
+                    )}
+                    {index !== cards.length - 1 && (
+                      <p>
+                        Between card {index + 1} and card {index + 2}
+                      </p>
+                    )}
+                  </Button>
+                ))}
+              </ButtonGroup>
+            )}
           </Col>
         </Row>
         <Row>
@@ -132,6 +170,9 @@ function Game(props) {
               Close
             </Button>
           </Col>
+        </Row>
+        <Row>
+          cards won: {cards.length - 3} cards lost: {lostCards}
         </Row>
       </Container>
     </>
