@@ -33,12 +33,20 @@ function Game(props) {
     initialCards();
   }, []);
 
-  // check if game is over
+  // check if game is over (logged user)
   useEffect(() => {
-    if (cards.length === 6) {
-      setGameResult("won");
-    } else if (lostCards === 3) {
-      setGameResult("lost");
+    if (props.loggedIn) {
+      if (cards.length === 6) {
+        setGameResult("won");
+      } else if (lostCards === 3) {
+        setGameResult("lost");
+      }
+    } else {
+      if (cards.length === 4) {
+        setGameResult("won");
+      } else if (lostCards === 1) {
+        setGameResult("lost");
+      }
     }
   }, [cards, lostCards]);
 

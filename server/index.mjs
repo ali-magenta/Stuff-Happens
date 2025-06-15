@@ -23,7 +23,6 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// ?? TOLOOK
 passport.use(
   // remember to pass the "email" field to this API
   new LocalStrategy({ usernameField: "email" }, async function verify(
@@ -54,7 +53,6 @@ const isLoggedIn = (req, res, next) => {
   return res.status(401).json({ error: "Not authorized" });
 };
 
-// ?? TOLOOK
 app.use(
   session({
     secret: "secret!",
@@ -88,7 +86,7 @@ app.post("/api/login", function (req, res, next) {
   })(req, res, next);
 });
 
-app.get("/api/session/current", (req, res) => {
+app.get("/api/session/current", isLoggedIn, (req, res) => {
   if (req.isAuthenticated()) {
     res.json(req.user); // user is stored in the session by passport
   } else {

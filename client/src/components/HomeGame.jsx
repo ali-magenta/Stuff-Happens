@@ -8,9 +8,11 @@ function HomeGame(props) {
   return (
     <>
       <Container fluid>
-        <Row className='bg-warning-subtle'>
-          <p>Log in to play the full version!</p>
-        </Row>
+        {!props.loggedIn && (
+          <Row className='bg-warning-subtle'>
+            <p>Log in to play the full version!</p>
+          </Row>
+        )}
         <Row className='mt-5'>
           <Col xs={9} className='d-flex justify-content-center'>
             {!game && (
@@ -18,7 +20,13 @@ function HomeGame(props) {
                 Start a new game!
               </Button>
             )}
-            {game && <Game setGame={setGame} game={game}></Game>}
+            {game && (
+              <Game
+                setGame={setGame}
+                game={game}
+                loggedIn={props.loggedIn}
+              ></Game>
+            )}
           </Col>
           <Col xs={3} className='bg-info-subtle'>
             Remember that after clicking on "Start the game!" the first round

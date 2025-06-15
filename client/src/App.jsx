@@ -10,7 +10,7 @@ import HomeGame from "./components/HomeGame";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState({});
   const [message, setMessage] = useState("");
 
   // pass it to the form login page
@@ -52,7 +52,7 @@ function App() {
           />
         }
       >
-        <Route path='/' element={<HomeGame />} />
+        <Route path='/' element={<HomeGame loggedIn={loggedIn} />} />
         <Route
           path='login'
           element={
