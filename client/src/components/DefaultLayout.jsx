@@ -17,7 +17,12 @@ function DefaultLayout(props) {
           </Alert>
         </Row>
       )}
-      <Container fluid className='mt-3'>
+      <Container fluid className='mt-3 '>
+        {!props.loggedIn && (
+          <Row className='bg-warning-subtle mb-5'>
+            <p>Log in to play the full version!</p>
+          </Row>
+        )}
         <Outlet />
       </Container>
     </>

@@ -7,11 +7,13 @@ import DefaultLayout from "./components/DefaultLayout";
 import LoginForm from "./components/LoginForm";
 import "bootstrap/dist/css/bootstrap.min.css";
 import HomeGame from "./components/HomeGame";
+import Game from "./components/Game";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState({});
   const [message, setMessage] = useState("");
+  const [game, setGame] = useState(false);
 
   // pass it to the form login page
   const handleLogin = async (credentials) => {
@@ -52,7 +54,16 @@ function App() {
           />
         }
       >
-        <Route path='/' element={<HomeGame loggedIn={loggedIn} />} />
+        <Route
+          path='/'
+          element={
+            <HomeGame loggedIn={loggedIn} game={game} setGame={setGame} />
+          }
+        />
+        <Route
+          path='game'
+          element={<Game loggedIn={loggedIn} game={game} setGame={setGame} />}
+        />
         <Route
           path='login'
           element={
