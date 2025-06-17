@@ -89,3 +89,47 @@ export const getIndex = (id) => {
     });
   });
 };
+
+// save a round
+export const addRound = (round) => {
+  return new Promise((resolve, reject) => {
+    const sql =
+      "INSERT INTO round(outcome, roundNumber, cardId) VALUES (?, ?, ?)";
+    db.run(
+      sql,
+      [round.outcome, round.roundNumber, round.cardId],
+      function (err) {
+        if (err) reject(err);
+        else resolve(this.lastID);
+      }
+    );
+  });
+};
+
+// save a game
+export const addGame = (game, userId) => {
+  return new Promise((resolve, reject) => {
+    const sql =
+      "INSERT INTO game(outcome, userId, card1, card2, card3, gameDate, round1, round2, round3, round4, round5) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    db.run(
+      sql,
+      [
+        game.outcome,
+        userId,
+        game.card1,
+        game.card2,
+        game.card3,
+        game.gameDate,
+        game.round1,
+        game.round2,
+        game.round3,
+        game.round4,
+        game.round5,
+      ],
+      function (err) {
+        if (err) reject(err);
+        else resolve(this.lastID);
+      }
+    );
+  });
+};

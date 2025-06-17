@@ -7,8 +7,15 @@ import {
   Row,
   Card,
 } from "react-bootstrap";
-import { getcardRound, getCards, getIndexSelected } from "../API/API";
+import {
+  getcardRound,
+  getCards,
+  getIndexSelected,
+  addGame,
+  addRound,
+} from "../API/API";
 import { Link } from "react-router";
+import dayjs from "dayjs";
 
 const URLImage = "http://localhost:3001/";
 
@@ -84,6 +91,48 @@ function Game(props) {
       setCardRound({});
     }
   }, [props.game]);
+
+  // handle saving of game when it ends
+  useEffect(() => {
+    if (!props.game && props.loggedIn) {
+      const saveCards = async () => {
+        let [card1, card2, card3, card4, card5, card6] = [...cards];
+        const currGame = {
+          outcome: gameResult,
+          card1: card1.id,
+          card2: card2.id,
+          card3: card3.id,
+          card4: card4?.id,
+          card5: card5?.id,
+          card6: card6?.id,
+          gameDate: dayjs().format("YYYY-MM-DDTHH:mm:ssZ"),
+        };
+        const g = addGame(currGame, props.user.id);
+      };
+      saveCards();
+    }
+  }, [props.game]);
+
+  // handle saving of round when it ends
+  useEffect(() => {
+    if (!round && roundNum) {
+      const saveRound = async () => {
+        let [card1, card2, card3, card4, card5, card6] = [...cards];
+        const currGame = {
+          outcome: gameResult,
+          card1: card1.id,
+          card2: card2.id,
+          card3: card3.id,
+          card4: card4?.id,
+          card5: card5?.id,
+          card6: card6?.id,
+          gameDate: dayjs().format("YYYY-MM-DDTHH:mm:ssZ"),
+        };
+        const g = addRound(currGame, props.user.id);
+      };
+      saveRound();
+    }
+  }, [round, roundNum]);
 
   // handle beginning of a round
   const handleCardRound = async () => {

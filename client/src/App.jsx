@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import { Navigate, Route, Routes } from "react-router";
+import { Navigate, Route, Routes, useNavigate } from "react-router";
 import { getCurrentUser, login, logout } from "./API/API";
 import { useEffect } from "react";
 import DefaultLayout from "./components/DefaultLayout";
@@ -8,12 +8,15 @@ import LoginForm from "./components/LoginForm";
 import "bootstrap/dist/css/bootstrap.min.css";
 import HomeGame from "./components/HomeGame";
 import Game from "./components/Game";
+import UserProfile from "./components/UserProfile";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState({});
   const [message, setMessage] = useState("");
   const [game, setGame] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [checkProfile, setCheckProfile] = useState(false);
 
   // pass it to the form login page
   const handleLogin = async (credentials) => {
@@ -43,39 +46,64 @@ function App() {
   }, []);
 
   return (
-    <Routes>
-      <Route
-        element={
-          <DefaultLayout
-            message={message}
-            setMessage={setMessage}
-            handleLogout={handleLogout}
-            loggedIn={loggedIn}
-          />
-        }
-      >
-        <Route
-          path='/'
-          element={
-            <HomeGame loggedIn={loggedIn} game={game} setGame={setGame} />
-          }
-        />
-        <Route
-          path='game'
-          element={<Game loggedIn={loggedIn} game={game} setGame={setGame} />}
-        />
-        <Route
-          path='login'
-          element={
-            loggedIn ? (
-              <Navigate to='/' />
-            ) : (
-              <LoginForm handleLogin={handleLogin} />
-            )
-          }
-        />
-      </Route>
-    </Routes>
+    <>
+      {loading ? (
+        <div>...page loading...</div>
+      ) : (
+        <Routes>
+          <Route
+            element={
+              <DefaultLayout
+                message={message}
+                setMessage={setMessage}
+                handleLogout={handleLogout}
+                loggedIn={loggedIn}
+                checkProfile={checkProfile}
+                setCheckProfile={setCheckProfile}
+              />
+            }
+          >
+            <Route
+              path='/'
+              element={
+                <HomeGame loggedIn={loggedIn} game={game} setGame={setGame} />
+              }
+            />
+            <Route
+              path='game'
+              element={
+                <Game
+                  loggedIn={loggedIn}
+                  game={game}
+                  setGame={setGame}
+                  user={user}
+                />
+              }
+            />
+            <Route
+              path='login'
+              element={
+                loggedIn ? (
+                  <Navigate to='/' />
+                ) : (
+                  <LoginForm handleLogin={handleLogin} />
+                )
+              }
+            />
+            <Route
+              path='profile'
+              element={
+                <UserProfile
+                  loggedIn={loggedIn}
+                  user={user}
+                  setCheckProfile={setCheckProfile}
+                />
+              }
+            />
+          </Route>
+        </Routes>
+      )}
+    </>
   );
 }
 

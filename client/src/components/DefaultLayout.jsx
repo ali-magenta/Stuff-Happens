@@ -5,7 +5,12 @@ import NavHeader from "./NavHeader";
 function DefaultLayout(props) {
   return (
     <>
-      <NavHeader handleLogout={props.handleLogout} loggedIn={props.loggedIn} />
+      <NavHeader
+        handleLogout={props.handleLogout}
+        loggedIn={props.loggedIn}
+        checkProfile={props.checkProfile}
+        setCheckProfile={props.setCheckProfile}
+      />
       {props.message && (
         <Row>
           <Alert

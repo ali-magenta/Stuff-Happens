@@ -5,7 +5,15 @@ import LocalStrategy from "passport-local";
 import passport from "passport";
 import session from "express-session";
 import cors from "cors";
-import { getCard, getUser, listCards, getIndex } from "./dao.mjs";
+import {
+  getCard,
+  getUser,
+  listCards,
+  getIndex,
+  addGame,
+  addRound,
+} from "./dao.mjs";
+import { check, validationResult } from "express-validator";
 
 // init express
 const app = new express();
@@ -155,6 +163,60 @@ app.get("/api/card/:cardId/index", async (request, response) => {
     response.status(500).end();
   }
 });
+
+app.post(
+  "/api/:userId/cards",
+  [
+    /*check('text').notEmpty(),
+  check('email').isEmail(),
+  check('score').isNumeric(),  */
+    check("gameDate").isISO8601(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const newGame = req.body;
+
+    const userId = req.params.userId;
+
+    try {
+      const id = await addGame(newGame, userId);
+      res.status(201).location(id).end();
+    } catch (e) {
+      console.error(`ERROR: ${e.message}`);
+      res.status(503).json({ error: "Impossible to create the game." });
+    }
+  }
+);
+
+app.post(
+  "/api/game/round",
+  [
+    /*check('text').notEmpty(),
+  check('email').isEmail(),
+  check('score').isNumeric(),  
+    check("gameDate").isISO8601(), */
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const newRound = req.body;
+
+    try {
+      const id = await addRound(newRound);
+      res.status(201).location(id).end();
+    } catch (e) {
+      console.error(`ERROR: ${e.message}`);
+      res.status(503).json({ error: "Impossible to create the round." });
+    }
+  }
+);
 
 // activate the server
 app.listen(port, () => {
