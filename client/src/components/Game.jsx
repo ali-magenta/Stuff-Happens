@@ -11,18 +11,19 @@ import {
   getcardRound,
   getCards,
   getIndexSelected,
-  addGame,
   addRound,
+  saveResult,
+  createGame,
 } from "../API/API";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import dayjs from "dayjs";
+import { useNavigate } from "react-router";
 
 const URLImage = "http://localhost:3001/";
 
 function Game(props) {
   const [round, setRound] = useState(false);
   const [roundNum, setRoundNum] = useState(0);
-  const [cards, setCards] = useState([]);
   const [cardRound, setCardRound] = useState({});
   const [result, setResult] = useState(false);
   const [resultMessage, setResultMessage] = useState({ message: "", type: "" });
@@ -32,21 +33,13 @@ function Game(props) {
   // handle timer
   const [timeLeft, setTimeLeft] = useState(30);
 
-  // give initial cards
-  useEffect(() => {
-    if (props.game) {
-      const initialCards = async () => {
-        const c = await getCards();
-        setCards(c);
-      };
-      initialCards();
-    }
-  }, [props.game]);
+  const { gameId } = useParams();
+  const navigate = useNavigate();
 
   // check if game is over (logged user)
   useEffect(() => {
     if (props.loggedIn) {
-      if (cards.length === 6) {
+      if (props.cards.length === 6) {
         setGameResult("won");
         props.setGame(false);
       } else if (lostCards === 3) {
@@ -54,7 +47,7 @@ function Game(props) {
         props.setGame(false);
       }
     } else {
-      if (cards.length === 4) {
+      if (props.cards.length === 4) {
         setGameResult("won");
         props.setGame(false);
       } else if (lostCards === 1) {
@@ -62,7 +55,7 @@ function Game(props) {
         props.setGame(false);
       }
     }
-  }, [cards, lostCards]);
+  }, [props.cards, lostCards]);
 
   // manage timer
   useEffect(() => {
@@ -92,47 +85,16 @@ function Game(props) {
     }
   }, [props.game]);
 
-  // handle saving of game when it ends
+  // save game result when game ends
   useEffect(() => {
-    if (!props.game && props.loggedIn) {
-      const saveCards = async () => {
-        let [card1, card2, card3, card4, card5, card6] = [...cards];
-        const currGame = {
-          outcome: gameResult,
-          card1: card1.id,
-          card2: card2.id,
-          card3: card3.id,
-          card4: card4?.id,
-          card5: card5?.id,
-          card6: card6?.id,
-          gameDate: dayjs().format("YYYY-MM-DDTHH:mm:ssZ"),
-        };
-        const g = addGame(currGame, props.user.id);
+    if (gameResult && props.loggedIn && !props.game) {
+      const saveGameResult = async () => {
+        const outcome = gameResult;
+        await saveResult(gameId, outcome);
       };
-      saveCards();
+      saveGameResult();
     }
-  }, [props.game]);
-
-  // handle saving of round when it ends
-  useEffect(() => {
-    if (!round && roundNum) {
-      const saveRound = async () => {
-        let [card1, card2, card3, card4, card5, card6] = [...cards];
-        const currGame = {
-          outcome: gameResult,
-          card1: card1.id,
-          card2: card2.id,
-          card3: card3.id,
-          card4: card4?.id,
-          card5: card5?.id,
-          card6: card6?.id,
-          gameDate: dayjs().format("YYYY-MM-DDTHH:mm:ssZ"),
-        };
-        const g = addRound(currGame, props.user.id);
-      };
-      saveRound();
-    }
-  }, [round, roundNum]);
+  }, [gameResult, props.game]);
 
   // handle beginning of a round
   const handleCardRound = async () => {
@@ -145,26 +107,60 @@ function Game(props) {
 
   // get index of this round, check if round won or lost, update cards won and lost
   const handleChoice = async (i) => {
+    let outcome;
     setRound(false);
 
     const index = await getIndexSelected(cardRound.id);
 
     // check if round won or lost
     cardRound.index = index;
-    const totCards = [...cards, cardRound];
+    const totCards = [...props.cards, cardRound];
     totCards.sort((a, b) => a.index - b.index);
 
     if (totCards.indexOf(cardRound) === i) {
       // right positioning
-      setResult(true);
+      outcome = "won";
       setResultMessage({ message: "Round won!", type: "success" });
       // set cards adding new one for next match
-      setCards(totCards);
+      props.setCards(totCards);
     } else {
-      setResult(false);
+      outcome = "lost";
       setResultMessage({ message: "Round lost!", type: "danger" });
       setLostCards((lost) => lost + 1);
     }
+
+    const saveRound = async () => {
+      const currRound = {
+        outcome: outcome,
+        roundNumber: roundNum,
+        cardId: cardRound.id,
+      };
+      const r = addRound(currRound, gameId);
+    };
+    if (props.loggedIn) await saveRound();
+  };
+
+  const handleRestart = async () => {
+    props.setGame(true);
+    const c = await getCards();
+    props.setCards(c);
+
+    let newGameId = -1;
+
+    if (props.loggedIn) {
+      const [card1, card2, card3] = [...c];
+      const currGame = {
+        outcome: "N/A",
+        card1: card1?.id,
+        card2: card2?.id,
+        card3: card3?.id,
+        gameDate: dayjs().format("YYYY-MM-DDTHH:mm:ssZ"),
+      };
+      const game = await createGame(currGame, props.user.id);
+      newGameId = game.gameId;
+    }
+
+    navigate("/game/" + newGameId);
   };
 
   return (
@@ -179,10 +175,7 @@ function Game(props) {
           {gameResult === "won" && <Row>Game Over! You Won!</Row>}
           {gameResult === "lost" && <Row>Game Over! You Lost!</Row>}
           {gameResult && (
-            <Button
-              variant='outline-success'
-              onClick={() => props.setGame(true)}
-            >
+            <Button variant='outline-success' onClick={handleRestart}>
               Start a new game!
             </Button>
           )}
@@ -244,16 +237,16 @@ function Game(props) {
                       >
                         <p>Before card 1</p>
                       </Button>
-                      {cards.map((c, index) => (
+                      {props.cards.map((c, index) => (
                         <Button
                           key={c.id}
                           onClick={() => handleChoice(index + 1)}
                           disabled={!round}
                         >
-                          {index === cards.length - 1 && (
+                          {index === props.cards.length - 1 && (
                             <p>After card {index + 1}</p>
                           )}
-                          {index !== cards.length - 1 && (
+                          {index !== props.cards.length - 1 && (
                             <p>
                               Between card {index + 1} and card {index + 2}
                             </p>
@@ -268,7 +261,7 @@ function Game(props) {
           </Col>
           <Col xs={8}>
             <Row>
-              {cards.map((c) => (
+              {props.cards.map((c) => (
                 <Col key={c.id} className='mb-3'>
                   <Card style={{ width: "16rem", height: "20rem" }}>
                     <Card.Img
@@ -289,7 +282,7 @@ function Game(props) {
           </Col>
         </Row>
         <Row>
-          cards won: {cards.length - 3} cards lost: {lostCards}
+          cards won: {props.cards.length - 3} cards lost: {lostCards}
         </Row>
       </Container>
     </>

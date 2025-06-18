@@ -12,6 +12,9 @@ import {
   getIndex,
   addGame,
   addRound,
+  saveResult,
+  getGames,
+  getCardById,
 } from "./dao.mjs";
 import { check, validationResult } from "express-validator";
 
@@ -150,6 +153,22 @@ app.get("/api/card", async (request, response) => {
   }
 });
 
+app.get("/api/card/:cardId", async (request, response) => {
+  try {
+    const card = await getCardById(request.params.cardId);
+    if (card?.error) {
+      res.status(500).json({ error: card.error });
+    } else if (card === null) {
+      response.status(404).json({ error: "Card not found" });
+    } else {
+      response.json(card);
+    }
+  } catch (err) {
+    console.error(err);
+    response.status(500).end();
+  }
+});
+
 app.get("/api/card/:cardId/index", async (request, response) => {
   try {
     const index = await getIndex(request.params.cardId);
@@ -183,8 +202,8 @@ app.post(
     const userId = req.params.userId;
 
     try {
-      const id = await addGame(newGame, userId);
-      res.status(201).location(id).end();
+      const gameId = await addGame(newGame, userId);
+      res.status(201).json({ gameId: gameId }).end();
     } catch (e) {
       console.error(`ERROR: ${e.message}`);
       res.status(503).json({ error: "Impossible to create the game." });
@@ -193,7 +212,7 @@ app.post(
 );
 
 app.post(
-  "/api/game/round",
+  "/api/game/:gameId/round",
   [
     /*check('text').notEmpty(),
   check('email').isEmail(),
@@ -207,9 +226,10 @@ app.post(
     }
 
     const newRound = req.body;
+    const gameId = req.params.gameId;
 
     try {
-      const id = await addRound(newRound);
+      const id = await addRound(newRound, gameId);
       res.status(201).location(id).end();
     } catch (e) {
       console.error(`ERROR: ${e.message}`);
@@ -217,6 +237,37 @@ app.post(
     }
   }
 );
+
+app.put("/api/game/:gameId", async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  const gameId = req.params.gameId;
+  const outcome = req.body.outcome;
+
+  try {
+    await saveResult(gameId, outcome);
+    res.status(204).end();
+  } catch (e) {
+    console.error(`ERROR: ${e.message}`);
+    res.status(503).json({ error: "Impossible to save the game result." });
+  }
+});
+
+app.get("/api/user/:userId/profile", async (req, res) => {
+  const userId = req.params.userId;
+
+  getGames(userId)
+    .then((games) => {
+      res.status(200).json(games);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: "Unable to retrieve user profile." });
+    });
+});
 
 // activate the server
 app.listen(port, () => {

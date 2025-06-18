@@ -16,7 +16,9 @@ function App() {
   const [message, setMessage] = useState("");
   const [game, setGame] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [checkProfile, setCheckProfile] = useState(false);
+  const [cards, setCards] = useState([]);
+  const [gameId, setGameId] = useState(0);
+  const [startRequested, setStartRequested] = useState(false);
 
   // pass it to the form login page
   const handleLogin = async (credentials) => {
@@ -58,25 +60,40 @@ function App() {
                 setMessage={setMessage}
                 handleLogout={handleLogout}
                 loggedIn={loggedIn}
-                checkProfile={checkProfile}
-                setCheckProfile={setCheckProfile}
               />
             }
           >
             <Route
               path='/'
               element={
-                <HomeGame loggedIn={loggedIn} game={game} setGame={setGame} />
+                <HomeGame
+                  loggedIn={loggedIn}
+                  game={game}
+                  setGame={setGame}
+                  user={user}
+                  cards={cards}
+                  setCards={setCards}
+                  gameId={gameId}
+                  setGameId={setGameId}
+                  startRequested={startRequested}
+                  setStartRequested={setStartRequested}
+                />
               }
             />
             <Route
-              path='game'
+              path='game/:gameId'
               element={
                 <Game
                   loggedIn={loggedIn}
                   game={game}
                   setGame={setGame}
                   user={user}
+                  cards={cards}
+                  setCards={setCards}
+                  gameId={gameId}
+                  setGameId={setGameId}
+                  startRequested={startRequested}
+                  setStartRequested={setStartRequested}
                 />
               }
             />
@@ -91,14 +108,8 @@ function App() {
               }
             />
             <Route
-              path='profile'
-              element={
-                <UserProfile
-                  loggedIn={loggedIn}
-                  user={user}
-                  setCheckProfile={setCheckProfile}
-                />
-              }
+              path='user/profile'
+              element={<UserProfile loggedIn={loggedIn} user={user} />}
             />
           </Route>
         </Routes>

@@ -91,8 +91,8 @@ async function getIndexSelected(id) {
   }
 }
 
-async function addRound(round) {
-  const response = await fetch(URI + `/game/round`, {
+async function addRound(round, gameId) {
+  const response = await fetch(URI + `/game/${gameId}/round`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -100,8 +100,8 @@ async function addRound(round) {
 
     body: JSON.stringify({
       outcome: round.outcome,
-      roundNumber: round.routeNumber,
-      cardId: round.card.id,
+      roundNumber: round.roundNumber,
+      cardId: round.cardId,
     }),
     credentials: "include",
   });
@@ -115,7 +115,7 @@ async function addRound(round) {
   } else return null;
 }
 
-async function addGame(game, userId) {
+async function createGame(game, userId) {
   const response = await fetch(URI + `/${userId}/cards`, {
     method: "POST",
     headers: {
@@ -129,11 +129,28 @@ async function addGame(game, userId) {
       card2: game.card2,
       card3: game.card3,
       gameDate: game.gameDate,
-      round1: game.round1,
-      round2: game.round2,
-      round3: game.round3,
-      round4: game.round4,
-      round5: game.round5,
+    }),
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    let errMessage = await response.json();
+    if (response.status === 422)
+      errMessage = `${errMessage.errors[0].msg} for ${errMessage.errors[0].path}.`;
+    else errMessage = errMessage.error;
+    throw errMessage;
+  } else return response.json();
+}
+
+async function saveResult(gameId, outcome) {
+  const response = await fetch(URI + `/game/${gameId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+
+    body: JSON.stringify({
+      outcome: outcome,
     }),
     credentials: "include",
   });
@@ -147,6 +164,29 @@ async function addGame(game, userId) {
   } else return null;
 }
 
+async function getGames(userId) {
+  const response = await fetch(URI + `/user/${userId}/profile`, {
+    credentials: "include",
+  });
+
+  if (response.ok) {
+    return response.json();
+  } else {
+    const err = await response.text();
+    throw err;
+  }
+}
+
+async function getCardById(id) {
+  const response = await fetch(`${URI}/card/${id}`);
+  if (response.ok) {
+    return response.json();
+  } else {
+    const err = await response.text();
+    throw err;
+  }
+}
+
 export {
   login,
   logout,
@@ -155,5 +195,8 @@ export {
   getcardRound,
   getIndexSelected,
   addRound,
-  addGame,
+  createGame,
+  saveResult,
+  getGames,
+  getCardById,
 };

@@ -7,10 +7,8 @@ function NavHeader(props) {
   const onLogoutClick = async () => {
     await props.handleLogout();
     // redirect if on user profile page
-    if (props.checkProfile) {
-      navigate("/");
-      props.setCheckProfile(false);
-    }
+
+    navigate("/");
   };
 
   return (
@@ -23,7 +21,7 @@ function NavHeader(props) {
           <Nav>
             {props.loggedIn && (
               <Nav.Link
-                href='/profile'
+                href='/user/profile'
                 style={{ color: "white" }}
                 className='me-4'
               >
