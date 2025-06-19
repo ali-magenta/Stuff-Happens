@@ -40,7 +40,7 @@ function HomeGame(props) {
                   image, name, and bad luck index.
                 </p>
                 <p>
-                  2. Each Round a new card is shown — you’ll see the image and
+                  2. Each Round a new card is shown: you’ll see the image and
                   name, but not the bad luck index. You must guess where this
                   new card fits.
                 </p>
