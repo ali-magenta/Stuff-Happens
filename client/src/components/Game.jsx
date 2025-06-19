@@ -6,19 +6,14 @@ import {
   Container,
   Row,
   Card,
-  Alert,
 } from "react-bootstrap";
 import {
   getcardRound,
-  getCards,
   getIndexSelected,
   addRound,
   saveResult,
-  createGame,
 } from "../API/API";
 import { useParams } from "react-router";
-import dayjs from "dayjs";
-import { useNavigate } from "react-router";
 
 const URLImage = "http://localhost:3001/";
 
@@ -30,12 +25,12 @@ function Game(props) {
   const [resultMessage, setResultMessage] = useState({ message: "", type: "" });
   const [gameResult, setGameResult] = useState("");
   const [lostCards, setLostCards] = useState(0);
+  const [wonCards, setWonCards] = useState([]);
 
   // handle timer
   const [timeLeft, setTimeLeft] = useState(30);
 
   const { gameId } = useParams();
-  const navigate = useNavigate();
 
   // check if game is over
   useEffect(() => {
@@ -83,6 +78,7 @@ function Game(props) {
       setLostCards(0);
       setResultMessage({ message: "", type: "" });
       setCardRound({});
+      setWonCards([]);
     }
   }, [props.game]);
 
@@ -125,6 +121,7 @@ function Game(props) {
       setResultMessage({ message: "Round won!", type: "success" });
       // set cards adding new one for next match
       props.setCards(totCards);
+      setWonCards((won) => [...won, newCard]);
     } else {
       outcome = "lost";
       setResultMessage({ message: "Round lost!", type: "danger" });
@@ -247,25 +244,52 @@ function Game(props) {
             </Container>
           </Col>
           <Col xs={8}>
-            <Row>
-              {props.cards.map((c) => (
-                <Col key={c.id} className='mb-3'>
-                  <Card style={{ width: "16rem", height: "20rem" }}>
-                    <Card.Img
-                      variant='top'
-                      src={URLImage + c.image}
-                      style={{ height: "12rem", objectFit: "cover" }}
-                    />
-                    <Card.Title className='mt-3 mb-2 d-flex justify-content-center'>
-                      {c.index}
-                    </Card.Title>
-                    <Card.Body className='pt-0'>
-                      <Card.Text>{c.name}</Card.Text>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+            {!props.game && gameResult ? (
+              <>
+                <Row className='mb-3'>
+                  <strong>Here are the cards you won during the game:</strong>
+                </Row>
+                <Row>
+                  {wonCards.map((c) => (
+                    <Col key={c.id} className='mb-3'>
+                      <Card style={{ width: "16rem", height: "20rem" }}>
+                        <Card.Img
+                          variant='top'
+                          src={URLImage + c.image}
+                          style={{ height: "12rem", objectFit: "cover" }}
+                        />
+                        <Card.Title className='mt-3 mb-2 d-flex justify-content-center'>
+                          {c.index}
+                        </Card.Title>
+                        <Card.Body className='pt-0'>
+                          <Card.Text>{c.name}</Card.Text>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              </>
+            ) : (
+              <Row>
+                {props.cards.map((c) => (
+                  <Col key={c.id} className='mb-3'>
+                    <Card style={{ width: "16rem", height: "20rem" }}>
+                      <Card.Img
+                        variant='top'
+                        src={URLImage + c.image}
+                        style={{ height: "12rem", objectFit: "cover" }}
+                      />
+                      <Card.Title className='mt-3 mb-2 d-flex justify-content-center'>
+                        {c.index}
+                      </Card.Title>
+                      <Card.Body className='pt-0'>
+                        <Card.Text>{c.name}</Card.Text>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            )}
           </Col>
         </Row>
         <Row className='text-center text-muted mt-3'>

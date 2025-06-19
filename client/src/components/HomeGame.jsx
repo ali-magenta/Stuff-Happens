@@ -3,17 +3,17 @@ import { Col, Container, Row, Button, Card } from "react-bootstrap";
 function HomeGame(props) {
   return (
     <>
-      <Container className='py-3'>
+      <Container className='py-2'>
         <Row className='justify-content-center'>
           <Col xs={12} md={10}>
             <Card
-              className='p-4'
+              className='p-2'
               style={{ backgroundColor: "#E5F9FF", borderRadius: "12px" }}
             >
               <Card.Body>
                 <Card.Title
                   as='h3'
-                  className='text-center mb-4 text-black fw-semibold'
+                  className='text-center mb-2 text-black fw-semibold'
                 >
                   🎵 Welcome to Stuff Happens – Music Edition 🎵
                 </Card.Title>
@@ -23,7 +23,7 @@ function HomeGame(props) {
                 <ul>
                   <li>
                     <strong>Registered Users:</strong> Play full games with a
-                    maximum of 6 rounds and track your game history.
+                    maximum of 5 rounds and track your game history.
                   </li>
                   <li>
                     <strong>Guests:</strong> Play a quick 1-round demo with 3
@@ -40,7 +40,7 @@ function HomeGame(props) {
                   image, name, and bad luck index.
                 </p>
                 <p>
-                  2. Each Round a new card is shown: you’ll see the image and
+                  2. Each round a new card is shown: you’ll see the image and
                   name, but not the bad luck index. You must guess where this
                   new card fits.
                 </p>
@@ -59,7 +59,7 @@ function HomeGame(props) {
           </Col>
         </Row>
         <Row>
-          <Col className='mt-4 d-flex justify-content-center'>
+          <Col className='mt-3 d-flex justify-content-center'>
             <Button
               size='lg'
               style={{
