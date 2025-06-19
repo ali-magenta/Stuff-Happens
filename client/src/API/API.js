@@ -177,7 +177,7 @@ async function getGames(userId) {
   }
 }
 
-async function getCardById(id) {
+/*async function getCardById(id) {
   const response = await fetch(`${URI}/card/${id}`);
   if (response.ok) {
     return response.json();
@@ -185,7 +185,7 @@ async function getCardById(id) {
     const err = await response.text();
     throw err;
   }
-}
+} */
 
 export {
   login,
@@ -198,5 +198,5 @@ export {
   createGame,
   saveResult,
   getGames,
-  getCardById,
+  // getCardById,
 };

@@ -153,6 +153,7 @@ app.get("/api/card", async (request, response) => {
   }
 });
 
+/*
 app.get("/api/card/:cardId", async (request, response) => {
   try {
     const card = await getCardById(request.params.cardId);
@@ -168,6 +169,7 @@ app.get("/api/card/:cardId", async (request, response) => {
     response.status(500).end();
   }
 });
+*/
 
 app.get("/api/card/:cardId/index", async (request, response) => {
   try {
