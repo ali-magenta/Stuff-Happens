@@ -1,5 +1,5 @@
 import { useActionState } from "react";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
+import { Form, Button, Row, Col } from "react-bootstrap";
 import { Link } from "react-router";
 
 function LoginForm(props) {
@@ -22,16 +22,19 @@ function LoginForm(props) {
   }
 
   return (
-    <Row className='align-items-center' style={{ minHeight: "60vh" }}>
-      <Col xs={3} />
-      <Col xs={6} className='justify-content-center'>
+    <Row
+      className='align-items-center justify-content-center'
+      style={{ minHeight: "60vh" }}
+    >
+      <Col xs={12} md={6}>
         <Form action={formAction}>
-          <Form.Group controlId='email' className='mb-4'>
+          <h3 className='mb-4 text-center'>Login</h3>
+          <Form.Group controlId='email' className='mb-3'>
             <Form.Label>Email</Form.Label>
             <Form.Control type='email' name='email' required />
           </Form.Group>
 
-          <Form.Group controlId='password' className='mb-4'>
+          <Form.Group controlId='password' className='mb-3'>
             <Form.Label>Password</Form.Label>
             <Form.Control
               type='password'
@@ -39,8 +42,8 @@ function LoginForm(props) {
               required
             ></Form.Control>
           </Form.Group>
-          {state.error && <p className='text-danger'>{state.error}</p>}
-          <Link className='btn btn-secondary' to={"/"}>
+          {state.error && <div className='text-danger mb-3'>{state.error}</div>}
+          <Link className='btn btn-secondary' to='/'>
             Cancel
           </Link>
           <Button className='ms-3' type='submit'>
@@ -48,7 +51,6 @@ function LoginForm(props) {
           </Button>
         </Form>
       </Col>
-      <Col xs={3} />
     </Row>
   );
 }

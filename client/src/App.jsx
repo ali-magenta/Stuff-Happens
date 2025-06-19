@@ -9,6 +9,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import HomeGame from "./components/HomeGame";
 import Game from "./components/Game";
 import UserProfile from "./components/UserProfile";
+import { getCards, createGame } from "./API/API";
+import dayjs from "dayjs";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -19,6 +21,8 @@ function App() {
   const [cards, setCards] = useState([]);
   const [gameId, setGameId] = useState(0);
   const [startRequested, setStartRequested] = useState(false);
+
+  const navigate = useNavigate();
 
   // pass it to the form login page
   const handleLogin = async (credentials) => {
@@ -46,6 +50,30 @@ function App() {
     };
     checkAuth();
   }, []);
+
+  const handleStart = async () => {
+    setGame(true); // Reset game state
+    const c = await getCards();
+    setCards(c);
+
+    let newGameId = -1;
+
+    if (loggedIn) {
+      const [card1, card2, card3] = [...c];
+      const currGame = {
+        outcome: "in progress",
+        card1: card1?.id,
+        card2: card2?.id,
+        card3: card3?.id,
+        gameDate: dayjs().format("YYYY-MM-DDTHH:mm:ssZ"),
+      };
+      const game = await createGame(currGame, user.id);
+      newGameId = game.gameId;
+    }
+
+    setGameId(newGameId);
+    navigate("/game/" + newGameId);
+  };
 
   return (
     <>
@@ -77,6 +105,7 @@ function App() {
                   setGameId={setGameId}
                   startRequested={startRequested}
                   setStartRequested={setStartRequested}
+                  handleStart={handleStart}
                 />
               }
             />
@@ -94,6 +123,7 @@ function App() {
                   setGameId={setGameId}
                   startRequested={startRequested}
                   setStartRequested={setStartRequested}
+                  handleRestart={handleStart}
                 />
               }
             />

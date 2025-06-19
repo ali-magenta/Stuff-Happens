@@ -12,7 +12,7 @@ function DefaultLayout(props) {
         setCheckProfile={props.setCheckProfile}
       />
       {props.message && (
-        <Row>
+        <Container className='mt-3'>
           <Alert
             variant={props.message.type}
             onClose={() => props.setMessage("")}
@@ -20,12 +20,17 @@ function DefaultLayout(props) {
           >
             {props.message.msg}
           </Alert>
-        </Row>
+        </Container>
       )}
-      <Container fluid className='mt-3 '>
+      <Container fluid className='mt-3 px-4 '>
         {!props.loggedIn && (
-          <Row className='bg-warning-subtle mb-5'>
-            <p>Log in to play the full version!</p>
+          <Row
+            className='py-3 px-3 mb-4 rounded'
+            style={{ backgroundColor: "#00CCFF" }}
+          >
+            <p className='mb-0 text-white fw-semibold'>
+              Log in to play the full version!
+            </p>
           </Row>
         )}
         <Outlet />

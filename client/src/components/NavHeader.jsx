@@ -6,38 +6,40 @@ function NavHeader(props) {
 
   const onLogoutClick = async () => {
     await props.handleLogout();
-    // redirect if on user profile page
-
     navigate("/");
   };
 
   return (
     <>
-      <Navbar bg='primary' expand='lg'>
+      <Navbar
+        style={{ backgroundColor: "#00CCFF" }}
+        className='shadow-sm'
+        expand='lg'
+      >
         <Container fluid>
-          <Link to='/' className='navbar-brand'>
-            <h2 style={{ color: "white" }}>Stuff Happens!</h2>
-          </Link>
+          <Navbar.Brand as={Link} to='/' className='text-white'>
+            <h2 className='mb-0'>Stuff Happens!</h2>
+          </Navbar.Brand>
           <Nav>
             {props.loggedIn && (
               <Nav.Link
-                href='/user/profile'
-                style={{ color: "white" }}
-                className='me-4'
+                as={Link}
+                to='/user/profile'
+                className='text-white me-4 fw-bold'
               >
                 Profile
               </Nav.Link>
             )}
             {props.loggedIn ? (
               <Button
-                className='me-4'
-                variant='outline-light'
+                className='me-4 fw-bold'
+                variant='light'
                 onClick={onLogoutClick}
               >
                 Logout
               </Button>
             ) : (
-              <Link to='/login' className='btn btn-outline-light me-4'>
+              <Link to='/login' className='btn btn-light me-4 fw-bold'>
                 Login
               </Link>
             )}

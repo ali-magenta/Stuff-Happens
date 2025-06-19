@@ -1,7 +1,6 @@
-import { use, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { getCardById, getGames } from "../API/API";
+import { getGames } from "../API/API";
 import dayjs from "dayjs";
 
 function UserProfile(props) {
@@ -24,13 +23,13 @@ function UserProfile(props) {
 
   return (
     <>
-      <h3>Hello {props.user.email}</h3>
-      <h2>History</h2>
+      <h3 className='mb-4'>Hello {props.user.email}</h3>
+      <h4 className='mb-3'>Game History</h4>
       <Container fluid>
         {games
           .filter((game) => game.outcome !== "in progress")
           .map((game) => (
-            <Container fluid key={game.id} className='mb-3'>
+            <Container fluid key={game.id} className='mb-4 p-3 border rounded'>
               <Row
                 className={`border-bottom mb-3 ${
                   game.outcome === "won"
@@ -38,9 +37,12 @@ function UserProfile(props) {
                     : "bg-danger-subtle"
                 }`}
               >
-                <h4>
-                  Game {game.outcome}, cards collected: {game.cardsCollected}
-                </h4>
+                <Col>
+                  <h5 className='mb-2 mt-2'>
+                    Game <strong>{game.outcome}</strong> - Cards collected:{" "}
+                    <strong>{game.cardsCollected}</strong>
+                  </h5>
+                </Col>
               </Row>
               <Row>
                 <Col xs={1}>

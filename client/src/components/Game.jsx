@@ -6,6 +6,7 @@ import {
   Container,
   Row,
   Card,
+  Alert,
 } from "react-bootstrap";
 import {
   getcardRound,
@@ -15,7 +16,7 @@ import {
   saveResult,
   createGame,
 } from "../API/API";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router";
 
@@ -25,7 +26,7 @@ function Game(props) {
   const [round, setRound] = useState(false);
   const [roundNum, setRoundNum] = useState(0);
   const [cardRound, setCardRound] = useState({});
-  const [result, setResult] = useState(false);
+  //const [result, setResult] = useState(false);
   const [resultMessage, setResultMessage] = useState({ message: "", type: "" });
   const [gameResult, setGameResult] = useState("");
   const [lostCards, setLostCards] = useState(0);
@@ -36,7 +37,7 @@ function Game(props) {
   const { gameId } = useParams();
   const navigate = useNavigate();
 
-  // check if game is over (logged user)
+  // check if game is over
   useEffect(() => {
     if (props.loggedIn) {
       if (props.cards.length === 6) {
@@ -77,7 +78,7 @@ function Game(props) {
     if (props.game) {
       setRound(false);
       setRoundNum(0);
-      setResult(false);
+      //setResult(false);
       setGameResult("");
       setLostCards(0);
       setResultMessage({ message: "", type: "" });
@@ -98,11 +99,11 @@ function Game(props) {
 
   // handle beginning of a round
   const handleCardRound = async () => {
+    setTimeLeft(30);
     setRound(true);
     setRoundNum((round) => round + 1);
     const card = await getcardRound();
     setCardRound(card);
-    setTimeLeft(30);
   };
 
   // get index of this round, check if round won or lost, update cards won and lost
@@ -113,11 +114,12 @@ function Game(props) {
     const index = await getIndexSelected(cardRound.id);
 
     // check if round won or lost
-    cardRound.index = index;
-    const totCards = [...props.cards, cardRound];
+    const newCard = cardRound;
+    newCard.index = index;
+    const totCards = [...props.cards, newCard];
     totCards.sort((a, b) => a.index - b.index);
 
-    if (totCards.indexOf(cardRound) === i) {
+    if (totCards.indexOf(newCard) === i) {
       // right positioning
       outcome = "won";
       setResultMessage({ message: "Round won!", type: "success" });
@@ -140,47 +142,28 @@ function Game(props) {
     if (props.loggedIn) await saveRound();
   };
 
-  const handleRestart = async () => {
-    props.setGame(true);
-    const c = await getCards();
-    props.setCards(c);
-
-    let newGameId = -1;
-
-    if (props.loggedIn) {
-      const [card1, card2, card3] = [...c];
-      const currGame = {
-        outcome: "N/A",
-        card1: card1?.id,
-        card2: card2?.id,
-        card3: card3?.id,
-        gameDate: dayjs().format("YYYY-MM-DDTHH:mm:ssZ"),
-      };
-      const game = await createGame(currGame, props.user.id);
-      newGameId = game.gameId;
-    }
-
-    navigate("/game/" + newGameId);
-  };
-
   return (
     <>
-      <Container className=''>
-        <Row className='d-flex justify-content-center'>
+      <Container className='py-4'>
+        <Row className='d-flex justify-content-center mb-2'>
           {!round && !gameResult && (
-            <Button variant='outline-success' onClick={handleCardRound}>
+            <Button variant='dark' size='lg' onClick={handleCardRound}>
               Start Round {roundNum + 1}
             </Button>
           )}
-          {gameResult === "won" && <Row>Game Over! You Won!</Row>}
-          {gameResult === "lost" && <Row>Game Over! You Lost!</Row>}
+          {gameResult === "won" && (
+            <h4 className='text-center my-3'>Game Over! You Won!</h4>
+          )}
+          {gameResult === "lost" && (
+            <h4 className='text-center my-3'>Game Over! You Lost!</h4>
+          )}
           {gameResult && (
-            <Button variant='outline-success' onClick={handleRestart}>
-              Start a new game!
+            <Button variant='dark' size='lg' onClick={props.handleRestart}>
+              Start a new game
             </Button>
           )}
         </Row>
-        <Row className='mt-2 mb-3'>
+        <Row className='mt-1 mb-3'>
           {roundNum !== 0 && (
             <>
               <Col xs={6} className='d-flex justify-content-start'>
@@ -209,14 +192,16 @@ function Game(props) {
                 <Col className='d-flex justify-content-start'>
                   {roundNum ? (
                     <Card style={{ width: "16rem", height: "20rem" }}>
-                      <Card.Img
-                        variant='top'
-                        src={URLImage + cardRound.image}
-                        style={{
-                          height: "12rem",
-                          objectFit: "cover",
-                        }}
-                      />
+                      {cardRound.image && (
+                        <Card.Img
+                          variant='top'
+                          src={URLImage + cardRound.image}
+                          style={{
+                            height: "12rem",
+                            objectFit: "cover",
+                          }}
+                        />
+                      )}
                       <Card.Body>
                         <Card.Text>{cardRound.name}</Card.Text>
                       </Card.Body>
@@ -234,6 +219,7 @@ function Game(props) {
                         key='0'
                         onClick={() => handleChoice(0)}
                         disabled={!round}
+                        variant='dark'
                       >
                         <p>Before card 1</p>
                       </Button>
@@ -241,6 +227,7 @@ function Game(props) {
                         <Button
                           key={c.id}
                           onClick={() => handleChoice(index + 1)}
+                          variant='dark'
                           disabled={!round}
                         >
                           {index === props.cards.length - 1 && (
@@ -281,8 +268,11 @@ function Game(props) {
             </Row>
           </Col>
         </Row>
-        <Row>
-          cards won: {props.cards.length - 3} cards lost: {lostCards}
+        <Row className='text-center text-muted mt-3'>
+          <p>
+            Cards won: <strong>{props.cards.length - 3}</strong> | Cards lost:{" "}
+            <strong>{lostCards}</strong>
+          </p>
         </Row>
       </Container>
     </>
