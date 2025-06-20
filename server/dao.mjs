@@ -24,13 +24,13 @@ export const getUser = (email, password) => {
         crypto.scrypt(password, salt, 32, function (err, hashedPassword) {
           if (err) reject(err);
           if (
-            // compare encrypted password in db with the encryption of the inserted one
+            // compare hashed password in db with the hash of the inserted one
             !crypto.timingSafeEqual(
               Buffer.from(db_hashedPassword, "hex"),
               hashedPassword
             )
           )
-            // password wrong
+            // password dosn't match
             resolve(false);
           else resolve(user);
         });
@@ -52,7 +52,6 @@ export const listCards = () => {
           (card) => new Card(card.id, card.name, card.image, card.index)
         );
 
-        // const threeCards = cards.slice(0, 3);
         resolve(cards);
       }
     });
@@ -62,6 +61,7 @@ export const listCards = () => {
 // get card for a round
 export const getCard = (givenIdList) => {
   return new Promise((resolve, reject) => {
+    // create a placeholder list like "?, ?, ?, ..." to put in the query
     const placeholders = givenIdList.map(() => "?").join(",");
     const sql = `SELECT * FROM card where id NOT IN (${placeholders}) ORDER BY RANDOM() LIMIT 1`;
 
@@ -75,26 +75,10 @@ export const getCard = (givenIdList) => {
   });
 };
 
-// get a card by its id
-export const getCardById = (id) => {
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM card WHERE id = ?";
-
-    db.get(sql, [id], (err, row) => {
-      if (err) {
-        reject(err);
-      } else if (row === undefined) {
-        resolve(null); // No card found with the given ID
-      } else {
-        resolve(new Card(row.id, row.name, row.image, row.index));
-      }
-    });
-  });
-};
-
 // get index for a selected card
 export const getIndex = (id) => {
   return new Promise((resolve, reject) => {
+    // "index" because it's a reserved word
     const sql = `SELECT "index" FROM card where id=?`;
 
     db.get(sql, id, (err, row) => {
@@ -139,6 +123,7 @@ export const addGame = (game, userId) => {
   });
 };
 
+// save the result at the end of a game
 export const saveResult = (gameId, outcome) => {
   return new Promise((resolve, reject) => {
     const sql = "UPDATE game SET outcome = ? WHERE id = ?";
@@ -149,9 +134,11 @@ export const saveResult = (gameId, outcome) => {
   });
 };
 
-// get all games of a user and respective rounds
+// get all games of a user and respective rounds: needed for the profile page
 export const getGames = (userId) => {
   return new Promise((resolve, reject) => {
+    // select all games of a user: join with the rounds of the game, and with cards for both game and rounds
+    // order by descending game date for history, and by round
     const sql = `
       SELECT 
         g.id AS gameId, g.*, 
@@ -181,6 +168,8 @@ export const getGames = (userId) => {
         let currentGame = null;
 
         rows.forEach((row) => {
+          // create array of games, each with an empty array for the rounds
+          // we have joins, so we need to check if the game wasn't already created from a previous row
           if (!currentGame || currentGame.id !== row.gameId) {
             currentGame = {
               id: row.gameId,
@@ -193,6 +182,7 @@ export const getGames = (userId) => {
             };
             games.push(currentGame);
           }
+          // add rounds to current game
           if (row.roundId) {
             currentGame.rounds.push({
               id: row.roundId,

@@ -14,7 +14,6 @@ import {
   addRound,
   saveResult,
   getGames,
-  getCardById,
 } from "./dao.mjs";
 import { check, validationResult } from "express-validator";
 
