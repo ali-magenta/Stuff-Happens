@@ -113,6 +113,7 @@ function App() {
               path='game/:gameId'
               element={
                 <Game
+                  key={gameId}
                   loggedIn={loggedIn}
                   game={game}
                   setGame={setGame}
