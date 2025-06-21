@@ -11,17 +11,6 @@ function DefaultLayout(props) {
         checkProfile={props.checkProfile}
         setCheckProfile={props.setCheckProfile}
       />
-      {props.message && (
-        <Container className='mt-3'>
-          <Alert
-            variant={props.message.type}
-            onClose={() => props.setMessage("")}
-            dismissible
-          >
-            {props.message.msg}
-          </Alert>
-        </Container>
-      )}
       <Container fluid className='mt-3 px-4 '>
         {!props.loggedIn && (
           <Row
@@ -32,6 +21,17 @@ function DefaultLayout(props) {
               Log in to play the full version!
             </p>
           </Row>
+        )}
+        {props.message && (
+          <Container className='mt-3'>
+            <Alert
+              variant={props.message.type}
+              onClose={() => props.setMessage("")}
+              dismissible
+            >
+              {props.message.msg}
+            </Alert>
+          </Container>
         )}
         <Outlet />
       </Container>

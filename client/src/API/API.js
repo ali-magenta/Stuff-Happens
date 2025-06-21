@@ -124,7 +124,6 @@ async function createGame(game, userId) {
 
     body: JSON.stringify({
       outcome: game.outcome,
-      userId: userId,
       card1: game.card1,
       card2: game.card2,
       card3: game.card3,

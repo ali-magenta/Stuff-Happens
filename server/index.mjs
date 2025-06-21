@@ -1,4 +1,3 @@
-// imports
 import express from "express";
 import morgan from "morgan";
 import LocalStrategy from "passport-local";
@@ -17,7 +16,7 @@ import {
 } from "./dao.mjs";
 import { check, validationResult } from "express-validator";
 
-// init express
+// initialize express
 const app = new express();
 const port = 3001;
 
@@ -121,6 +120,7 @@ app.get("/api/cards", (request, response) => {
           givenCards.push(card.id);
         }
       });
+      // send them alredy sorted by index
       cards.sort((a, b) => a.index - b.index);
       response.json(cards);
     })
@@ -132,6 +132,7 @@ app.get("/api/cards", (request, response) => {
 
 app.get("/api/card", async (request, response) => {
   try {
+    // pass givenCards to avoid getting the same card
     const card = await getCard(givenCards);
     if (card?.error) {
       res.status(500).json({ error: card.error });
@@ -152,24 +153,6 @@ app.get("/api/card", async (request, response) => {
   }
 });
 
-/*
-app.get("/api/card/:cardId", async (request, response) => {
-  try {
-    const card = await getCardById(request.params.cardId);
-    if (card?.error) {
-      res.status(500).json({ error: card.error });
-    } else if (card === null) {
-      response.status(404).json({ error: "Card not found" });
-    } else {
-      response.json(card);
-    }
-  } catch (err) {
-    console.error(err);
-    response.status(500).end();
-  }
-});
-*/
-
 app.get("/api/card/:cardId/index", async (request, response) => {
   try {
     const index = await getIndex(request.params.cardId);
@@ -186,11 +169,13 @@ app.get("/api/card/:cardId/index", async (request, response) => {
 
 app.post(
   "/api/:userId/cards",
+  isLoggedIn,
   [
-    /*check('text').notEmpty(),
-  check('email').isEmail(),
-  check('score').isNumeric(),  */
-    check("gameDate").isISO8601(),
+    check("outcome").notEmpty(),
+    check("card1").notEmpty().isInt(),
+    check("card2").notEmpty().isInt(),
+    check("card3").notEmpty().isInt(),
+    check("gameDate").notEmpty().isISO8601(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -199,26 +184,26 @@ app.post(
     }
 
     const newGame = req.body;
-
     const userId = req.params.userId;
 
     try {
       const gameId = await addGame(newGame, userId);
+      // return gameId to use it as a parameter later for rounds
       res.status(201).json({ gameId: gameId }).end();
     } catch (e) {
       console.error(`ERROR: ${e.message}`);
-      res.status(503).json({ error: "Impossible to create the game." });
+      res.status(500).json({ error: "Impossible to create the game." });
     }
   }
 );
 
 app.post(
   "/api/game/:gameId/round",
+  isLoggedIn,
   [
-    /*check('text').notEmpty(),
-  check('email').isEmail(),
-  check('score').isNumeric(),  
-    check("gameDate").isISO8601(), */
+    check("outcome").notEmpty(),
+    check("roundNumber").notEmpty().isInt(),
+    check("cardId").notEmpty().isInt(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -231,33 +216,38 @@ app.post(
 
     try {
       const id = await addRound(newRound, gameId);
-      res.status(201).location(id).end();
+      res.status(201).json({ id }).end();
     } catch (e) {
       console.error(`ERROR: ${e.message}`);
-      res.status(503).json({ error: "Impossible to create the round." });
+      res.status(500).json({ error: "Impossible to create the round." });
     }
   }
 );
 
-app.put("/api/game/:gameId", async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
+app.put(
+  "/api/game/:gameId",
+  isLoggedIn,
+  [check("outcome").notEmpty()],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const gameId = req.params.gameId;
+    const outcome = req.body.outcome;
+
+    try {
+      await saveResult(gameId, outcome);
+      res.status(204).end();
+    } catch (e) {
+      console.error(`ERROR: ${e.message}`);
+      res.status(500).json({ error: "Impossible to save the game result." });
+    }
   }
+);
 
-  const gameId = req.params.gameId;
-  const outcome = req.body.outcome;
-
-  try {
-    await saveResult(gameId, outcome);
-    res.status(204).end();
-  } catch (e) {
-    console.error(`ERROR: ${e.message}`);
-    res.status(503).json({ error: "Impossible to save the game result." });
-  }
-});
-
-app.get("/api/user/:userId/profile", async (req, res) => {
+app.get("/api/user/:userId/profile", isLoggedIn, async (req, res) => {
   const userId = req.params.userId;
 
   getGames(userId)
