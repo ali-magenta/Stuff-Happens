@@ -17,10 +17,8 @@ function App() {
   const [user, setUser] = useState({});
   const [message, setMessage] = useState("");
   const [game, setGame] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [cards, setCards] = useState([]);
   const [gameId, setGameId] = useState(0);
-  const [startRequested, setStartRequested] = useState(false);
 
   const navigate = useNavigate();
 
@@ -44,9 +42,14 @@ function App() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const user = await getCurrentUser();
-      setLoggedIn(true);
-      setUser(user);
+      try {
+        const user = await getCurrentUser();
+        setLoggedIn(true);
+        setUser(user);
+      } catch (error) {
+        setLoggedIn(false);
+        setUser({});
+      }
     };
     checkAuth();
   }, []);
@@ -76,76 +79,48 @@ function App() {
   };
 
   return (
-    <>
-      {loading ? (
-        <div>...page loading...</div>
-      ) : (
-        <Routes>
-          <Route
-            element={
-              <DefaultLayout
-                message={message}
-                setMessage={setMessage}
-                handleLogout={handleLogout}
-                loggedIn={loggedIn}
-              />
-            }
-          >
-            <Route
-              path='/'
-              element={
-                <HomeGame
-                  loggedIn={loggedIn}
-                  game={game}
-                  setGame={setGame}
-                  user={user}
-                  cards={cards}
-                  setCards={setCards}
-                  gameId={gameId}
-                  setGameId={setGameId}
-                  startRequested={startRequested}
-                  setStartRequested={setStartRequested}
-                  handleStart={handleStart}
-                />
-              }
+    <Routes>
+      <Route
+        element={
+          <DefaultLayout
+            message={message}
+            setMessage={setMessage}
+            handleLogout={handleLogout}
+            loggedIn={loggedIn}
+          />
+        }
+      >
+        <Route path='/' element={<HomeGame handleStart={handleStart} />} />
+        <Route
+          path='game/:gameId'
+          element={
+            <Game
+              key={gameId}
+              loggedIn={loggedIn}
+              game={game}
+              setGame={setGame}
+              cards={cards}
+              setCards={setCards}
+              handleRestart={handleStart}
             />
-            <Route
-              path='game/:gameId'
-              element={
-                <Game
-                  key={gameId}
-                  loggedIn={loggedIn}
-                  game={game}
-                  setGame={setGame}
-                  user={user}
-                  cards={cards}
-                  setCards={setCards}
-                  gameId={gameId}
-                  setGameId={setGameId}
-                  startRequested={startRequested}
-                  setStartRequested={setStartRequested}
-                  handleRestart={handleStart}
-                />
-              }
-            />
-            <Route
-              path='login'
-              element={
-                loggedIn ? (
-                  <Navigate to='/' />
-                ) : (
-                  <LoginForm handleLogin={handleLogin} />
-                )
-              }
-            />
-            <Route
-              path='user/profile'
-              element={<UserProfile loggedIn={loggedIn} user={user} />}
-            />
-          </Route>
-        </Routes>
-      )}
-    </>
+          }
+        />
+        <Route
+          path='login'
+          element={
+            loggedIn ? (
+              <Navigate to='/' />
+            ) : (
+              <LoginForm handleLogin={handleLogin} />
+            )
+          }
+        />
+        <Route
+          path='user/profile'
+          element={loggedIn ? <UserProfile user={user} /> : <Navigate to='/' />}
+        />
+      </Route>
+    </Routes>
   );
 }
 
