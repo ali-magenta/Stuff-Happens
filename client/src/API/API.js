@@ -97,7 +97,6 @@ async function addRound(round, gameId) {
     headers: {
       "Content-Type": "application/json",
     },
-
     body: JSON.stringify({
       outcome: round.outcome,
       roundNumber: round.roundNumber,
@@ -176,16 +175,6 @@ async function getGames(userId) {
   }
 }
 
-/*async function getCardById(id) {
-  const response = await fetch(`${URI}/card/${id}`);
-  if (response.ok) {
-    return response.json();
-  } else {
-    const err = await response.text();
-    throw err;
-  }
-} */
-
 export {
   login,
   logout,
@@ -197,5 +186,4 @@ export {
   createGame,
   saveResult,
   getGames,
-  // getCardById,
 };
