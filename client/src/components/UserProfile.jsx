@@ -14,6 +14,8 @@ function UserProfile(props) {
           game.cardsCollected = game.rounds.filter(
             (card) => card.outcome === "won"
           ).length;
+          // requirements say "show the total number of collected cards", so also starting cards are included
+          game.cardsCollected = game.cardsCollected + 3;
         });
         setGames(gamesList);
       };
