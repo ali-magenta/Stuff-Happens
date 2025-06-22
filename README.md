@@ -92,6 +92,10 @@
     {...}
     ]
   ```
+- Authentication routes:
+  - POST `/api/login`
+  - POST `/api/logout`
+  - GET `/api/session/current`
 
 ## Database Tables
 
