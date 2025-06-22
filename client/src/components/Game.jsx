@@ -21,7 +21,6 @@ function Game(props) {
   const [round, setRound] = useState(false);
   const [roundNum, setRoundNum] = useState(0);
   const [cardRound, setCardRound] = useState({});
-  //const [result, setResult] = useState(false);
   const [resultMessage, setResultMessage] = useState({ message: "", type: "" });
   const [gameResult, setGameResult] = useState("");
   const [lostCards, setLostCards] = useState(0);
@@ -73,7 +72,6 @@ function Game(props) {
     if (props.game) {
       setRound(false);
       setRoundNum(0);
-      //setResult(false);
       setGameResult("");
       setLostCards(0);
       setResultMessage({ message: "", type: "" });

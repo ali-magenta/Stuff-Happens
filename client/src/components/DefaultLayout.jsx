@@ -5,16 +5,11 @@ import NavHeader from "./NavHeader";
 function DefaultLayout(props) {
   return (
     <>
-      <NavHeader
-        handleLogout={props.handleLogout}
-        loggedIn={props.loggedIn}
-        checkProfile={props.checkProfile}
-        setCheckProfile={props.setCheckProfile}
-      />
+      <NavHeader handleLogout={props.handleLogout} loggedIn={props.loggedIn} />
       <Container fluid className='mt-3 px-4 '>
         {!props.loggedIn && (
           <Row
-            className='py-3 px-3 mb-4 rounded'
+            className='py-2 px-3 mb-4 rounded'
             style={{ backgroundColor: "#00CCFF" }}
           >
             <p className='mb-0 text-white fw-semibold'>

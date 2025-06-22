@@ -18,7 +18,7 @@ function NavHeader(props) {
       >
         <Container fluid>
           <Navbar.Brand as={Link} to='/' className='text-white'>
-            <h2 className='mb-0'>Stuff Happens!</h2>
+            <h2 className='mb-0'>Stuff Happens</h2>
           </Navbar.Brand>
           <Nav>
             {props.loggedIn && (
